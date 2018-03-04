@@ -1,0 +1,130 @@
+Option Explicit
+Option Base 1
+
+'this is for the opan and use other Exel files, put in public, so only need open it one time, and close before the process finished.
+
+Public wb_F1_AU_DATA_CLEANSING                                  As Workbook
+Public wb_F2_SSL_PAWB_GVPIBM_AU_sample                          As Workbook
+Public wb_F3_SSL_PAWB_GVPIBM_AU                                 As Workbook
+Public wb_F4_AU_DATA_CLEANSING_after_automatic_run              As Workbook
+Public wb_F5_Zip_File                                           As Workbook
+Public wb_F6_Log_File                                           As Workbook
+Public wb_F7_Macro_Error_Flag_File                              As Workbook
+
+'open a workbook
+'if workbook already opened, just use it, if not then open it.
+'in_wb_path is the path
+Function checkAndAttachWorkbook(in_wb_path As String) As Workbook
+    Dim wb As Workbook
+    Dim mywb As String
+    mywb = in_wb_path
+    
+    For Each wb In Workbooks
+        If LCase(wb.FullName) = LCase(mywb) Then
+            Set checkAndAttachWorkbook = wb
+            Exit Function
+        End If
+    Next
+    Set wb = Workbooks.Open(in_wb_path, UpdateLinks:=0)
+    Set checkAndAttachWorkbook = wb
+
+End Function
+'close a workbook
+'parm1 - workbook's path
+'parm2 - Whether or not to save
+Function checkAndCloseWorkbook(in_wb_path As String, in_saved As Boolean)
+    Dim wb As Workbook
+    Dim mywb As String
+    mywb = in_wb_path
+    For Each wb In Workbooks
+        If LCase(wb.FullName) = LCase(mywb) Then
+            wb.Close SaveChanges:=in_saved
+            Exit Function
+        End If
+    Next
+End Function
+Sub openF1_AU_DATA_CLEANSING()
+    Set wb_F1_AU_DATA_CLEANSING = checkAndAttachWorkbook(get_F1_AU_DATA_CLEANSING)
+End Sub
+
+Sub closeF1_AU_DATA_CLEANSING(in_saved As Boolean)
+    checkAndCloseWorkbook get_F1_AU_DATA_CLEANSING, in_saved
+    Set wb_F1_AU_DATA_CLEANSING = Nothing
+End Sub
+
+Sub openF2_SSL_PAWB_GVPIBM_AU_sample()
+    Set wb_F2_SSL_PAWB_GVPIBM_AU_sample = checkAndAttachWorkbook(get_F2_SSL_PAWB_GVPIBM_AU_sample)
+End Sub
+
+Sub closeF2_SSL_PAWB_GVPIBM_AU_sample(in_saved As Boolean)
+    checkAndCloseWorkbook get_F2_SSL_PAWB_GVPIBM_AU_sample, in_saved
+    Set wb_F2_SSL_PAWB_GVPIBM_AU_sample = Nothing
+End Sub
+
+Sub openF3_SSL_PAWB_GVPIBM_AU()
+    Set wb_F3_SSL_PAWB_GVPIBM_AU = checkAndAttachWorkbook(get_F3_SSL_PAWB_GVPIBM_AU)
+End Sub
+
+Sub closeF3_SSL_PAWB_GVPIBM_AU(in_saved As Boolean)
+    checkAndCloseWorkbook get_F3_SSL_PAWB_GVPIBM_AU, in_saved
+    Set wb_F3_SSL_PAWB_GVPIBM_AU = Nothing
+End Sub
+
+Sub openF4_AU_DATA_CLEANSING_after_automatic_run()
+    Set wb_F4_AU_DATA_CLEANSING_after_automatic_run = checkAndAttachWorkbook(get_F4_AU_DATA_CLEANSING_after_automatic_run)
+End Sub
+
+Sub closeF4_AU_DATA_CLEANSING_after_automatic_run(in_saved As Boolean)
+    checkAndCloseWorkbook get_F4_AU_DATA_CLEANSING_after_automatic_run, in_saved
+    Set wb_F4_AU_DATA_CLEANSING_after_automatic_run = Nothing
+End Sub
+
+Sub openF5_Zip_File()
+    Set wb_F5_Zip_File = checkAndAttachWorkbook(get_F5_Zip_File)
+End Sub
+
+Sub closeF5_Transfer_Mismatch_Report(in_saved As Boolean)
+    checkAndCloseWorkbook get_F5_Zip_File, in_saved
+    Set wb_F5_Zip_File = Nothing
+End Sub
+
+Sub openF6_Log_File()
+    Set wb_F6_Log_File = checkAndAttachWorkbook(get_F6_Log_File)
+End Sub
+
+Sub closeF6_Entries_Leaving_Report(in_saved As Boolean)
+    checkAndCloseWorkbook get_F6_Log_File, in_saved
+    Set wb_F6_Log_File = Nothing
+End Sub
+
+
+Sub openF7_Macro_Error_Flag_File()
+    Set wb_F7_Macro_Error_Flag_File = checkAndAttachWorkbook(get_F7_Macro_Error_Flag_File)
+End Sub
+
+Sub closeF7_Macro_Error_Flag_File(in_saved As Boolean)
+    checkAndCloseWorkbook get_F7_Macro_Error_Flag_File, in_saved
+    Set wb_F7_Macro_Error_Flag_File = Nothing
+End Sub
+
+
+'allow alerts display and update screen
+Function displayON()
+    Application.DisplayAlerts = True
+    Application.ScreenUpdating = True
+End Function
+
+
+'don't allow alerts display, or update screen
+Function displayOFF()
+    Application.DisplayAlerts = False
+    Application.ScreenUpdating = False
+End Function
+
+Function closeAllFiles()
+    closeF1_AU_DATA_CLEANSING False
+    closeF2_SSL_PAWB_GVPIBM_AU_sample False
+    closeF3_SSL_PAWB_GVPIBM_AU True
+    closeF4_AU_DATA_CLEANSING_after_automatic_run True
+End Function
+

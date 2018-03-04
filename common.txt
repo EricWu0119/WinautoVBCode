@@ -1,0 +1,30 @@
+Option Explicit
+
+'Story 4a - verify 3 field and create summary
+Function Executecleaning()
+    
+    displayOFF
+    Cleaning
+    closeAllFiles
+    displayON
+    
+End Function
+
+
+'Story 4b - verify TFN filed
+Function ExecuteinvalidateTFN()
+    
+    displayOFF
+    invalidateTFN
+    closeAllFiles
+    displayON
+    
+End Function
+
+
+
+Function getAlertFlag()
+    getAlertFlag = handleAlert
+End Function
+
+

@@ -1,0 +1,201 @@
+
+Sub Cleaning()
+
+    Dim ws_input As Worksheet
+    Dim ws_work As Worksheet
+    Dim ws_summary As Worksheet
+    Dim ws_sample As Worksheet
+   
+
+    Dim address1_count As Integer
+    Dim address2_count As Integer
+    Dim city_count As Integer
+    Dim y As Integer
+    y = 12
+
+    Dim STRAS As String
+    Dim LOCAT As String
+    Dim ORT01 As String
+
+    Dim W_address2 As String
+
+    Dim W_subject   As String
+    Dim W_subject1  As String
+    Dim W_subject2  As String
+
+
+    If checkFileExist(get_F4_AU_DATA_CLEANSING_after_automatic_run) Then Kill get_F4_AU_DATA_CLEANSING_after_automatic_run
+        
+    FileCopy get_F1_AU_DATA_CLEANSING, get_F4_AU_DATA_CLEANSING_after_automatic_run
+    
+    openF4_AU_DATA_CLEANSING_after_automatic_run
+    
+    
+
+    Set ws_input = wb_F4_AU_DATA_CLEANSING_after_automatic_run.Sheets(1)
+
+    ws_input.Name = "Input"
+
+    ws_input.Copy After:=ws_input
+
+    Set ws_work = wb_F4_AU_DATA_CLEANSING_after_automatic_run.Worksheets(2)
+
+    ws_work.Name = "Working sheet"
+
+    Set ws_sample = ThisWorkbook.Sheets("Summary sample")
+
+    ws_sample.Copy After:=ws_work
+
+    Set ws_summary = wb_F4_AU_DATA_CLEANSING_after_automatic_run.Worksheets(3)
+    
+    ws_summary.Name = "Summary"
+
+    ws_work.Columns("G").Insert Shift:=xlToRight, CopyOrigin:=xlFormatFromLeftOrAbove
+
+    ws_work.Columns("I").Insert Shift:=xlToRight, CopyOrigin:=xlFormatFromLeftOrAbove
+
+    ws_work.Columns("N").Insert Shift:=xlToRight, CopyOrigin:=xlFormatFromLeftOrAbove
+
+    ws_work.Columns("R").Insert Shift:=xlToRight, CopyOrigin:=xlFormatFromLeftOrAbove
+
+    Call changeHeader
+
+    ROW_count = ws_work.[A2].CurrentRegion.Rows.Count
+
+
+
+   For i = 1 To ROW_count
+
+      address1 = ws_work.Cells(i, 6)
+      address2 = ws_work.Cells(i, 13)
+      city = ws_work.Cells(i, 8)
+
+
+      STRAS = address1
+      LOCAT = address2
+      ORT01 = city
+
+    For j = 1 To Len(address1)
+     If (Mid(address1, j, 1) = ";" And j <> Len(address1)) Then
+
+        STRAS = Mid(address1, 1, j - 1)
+        WS_address2 = Mid(address1, j + 1, Len(address1) - j)
+        LOCAT = W_address2 & " " & LOCAT
+     Exit For
+     End If
+    Next
+
+      STRAS = Replace(STRAS, ",", " ")
+      STRAS = Replace(STRAS, ".", "")
+      STRAS = Replace(STRAS, "#", "")
+      STRAS = Replace(STRAS, ";", "")
+      STRAS = reducespace(STRAS)
+      If address1 <> STRAS Then
+      ws_work.Cells(i, 7) = Trim(STRAS)
+      address1_count = address1_count + 1
+      End If
+
+      LOCAT = Replace(LOCAT, ",", " ")
+      LOCAT = Replace(LOCAT, ".", "")
+      LOCAT = Replace(LOCAT, "#", "")
+      LOCAT = Replace(LOCAT, ";", " ")
+      LOCAT = reducespace(LOCAT)
+      If address2 <> LOCAT Then
+      ws_work.Cells(i, 14) = Trim(LOCAT)
+      address2_count = address2_count + 1
+      End If
+
+
+      ORT01 = Replace(ORT01, ",", " ")
+      ORT01 = Replace(ORT01, ".", " ")
+      ORT01 = reducespace(ORT01)
+
+
+      For k = 1 To Len(ORT01)
+         If IsNumeric(Mid(ORT01, k, 1)) Then
+             ws_summary.Cells(y, 2) = ws_work.Cells(i, 1)
+             ws_summary.Cells(y, 3) = ws_work.Cells(i, 2)
+             ws_summary.Cells(y, 4) = "City with Number"
+             ws_summary.Cells(y, 5) = ws_work.Cells(i, 8)
+             y = y + 1
+         Exit For
+         End If
+      Next
+
+    If city <> ORT01 Then
+      ws_work.Cells(i, 9) = Trim(ORT01)
+      city_count = city_count + 1
+    End If
+
+
+  Next
+
+
+
+
+
+   W_subject1 = get_Current_pay_cycle_value
+
+   If get_Current_pay_cycle_type = "QM" Then
+
+      W_subject2 = "monthly"
+
+   Else
+      W_subject2 = "fornightly"
+   End If
+
+   W_subject = "Summary Information for AU Data Cleansing in " & W_subject1 & " paycycle (" & W_subject2 & ")"
+
+
+   ws_summary.Cells(3, 2) = address1_count
+   ws_summary.Cells(4, 2) = address2_count
+   ws_summary.Cells(5, 2) = city_count
+   ws_summary.Cells(1, 2) = W_subject
+
+
+
+
+  closeF4_AU_DATA_CLEANSING_after_automatic_run True
+
+End Sub
+ Function reducespace(result As String) As String
+    Dim RegEx  As Object
+    Set RegEx = CreateObject("vbscript.regexp")
+     With RegEx
+         .Global = True
+         .Pattern = "\s+"
+     End With
+
+     reducespace = RegEx.Replace(result, Chr(32))
+     Set RegEx = Nothing
+ End Function
+
+Function checkFileExist(in_path As String) As Boolean
+
+    If Dir(in_path) <> Empty Then
+        checkFileExist = True
+    Else
+        checkFileExist = False
+    End If
+
+End Function
+
+Function changeHeader()
+    wb_F4_AU_DATA_CLEANSING_after_automatic_run.Sheets(2).Range(STR_House_number_and_street_newvalue & "1").Value = "Correction"
+    wb_F4_AU_DATA_CLEANSING_after_automatic_run.Sheets(2).Range(STR_City_newvalue & "1").Value = "Correction"
+    wb_F4_AU_DATA_CLEANSING_after_automatic_run.Sheets(2).Range(STR_2nd_Address_Line_newvalue & "1").Value = "Correction"
+    wb_F4_AU_DATA_CLEANSING_after_automatic_run.Sheets(2).Range(STR_New_TFN_Tax_File_Number_newvalue & "1").Value = "Validation result"
+End Function
+
+Function get_Current_pay_cycle_value()
+get_Current_pay_cycle_value = Right(get_Current_pay_cycle, Len(get_Current_pay_cycle) - 3)
+'MsgBox get_Current_pay_cycle_value
+End Function
+
+Function get_Current_pay_cycle_type()
+get_Current_pay_cycle_type = Left(get_Current_pay_cycle, Len(get_Current_pay_cycle) - 7)
+'MsgBox get_Current_pay_cycle_type
+End Function
+
+
+

@@ -1,0 +1,76 @@
+
+Sub checkTFN()
+
+    openF4_AU_DATA_CLEANSING_after_automatic_run
+    Dim rng As Range, lastRowNum As Integer, invalidateCount As Integer
+    invalidateCount = 0
+    
+    lastRowNum = wb_F4_AU_DATA_CLEANSING_after_automatic_run.Worksheets(2).UsedRange.Rows.Count
+    
+     For i = 2 To lastRowNum Step 1
+     
+        Dim str_tfn As String
+        str_tfn = wb_F4_AU_DATA_CLEANSING_after_automatic_run.Worksheets(2).Range("Q" & i).Value
+        If IsNumeric(str_tfn) Then
+            Dim validate_ret As String
+            validate_ret = validateTFN(str_tfn)
+            If validate_ret = STR_TFN_Error_MSG Then
+            wb_F4_AU_DATA_CLEANSING_after_automatic_run.Worksheets(2).Range("R" & i).Value = validate_ret
+            invalidateCount = invalidateCount + 1
+            End If
+        Else
+           wb_F4_AU_DATA_CLEANSING_after_automatic_run.Worksheets(2).Range("R" & i).Value = STR_TFN_Error_MSG
+           invalidateCount = invalidateCount + 1
+        End If
+       
+     Next
+     
+     wirteToSummary (invalidateCount)
+     closeF4_AU_DATA_CLEANSING_after_automatic_run True
+     
+End Sub
+
+Function validateTFN(str_tfn As String) As String
+  Dim weights(9) As Integer
+  Dim str_ret As String, int_total As Integer
+  int_total = 0
+  wights = Array(1, 4, 3, 7, 5, 8, 6, 9, 10)
+  
+  If Len(str_tfn) <> 9 Then
+    validateTFN = STR_TFN_Error_MSG
+    Exit Function
+  End If
+  
+  For i = 1 To 9 Step 1
+   int_total = int_total + wights(i - 1) * Val(Mid(str_tfn, i, 1))
+  Next
+  
+   'Invert the weight to find what the correct check digit is
+   'Easy to do, because the weight for the last digit is 10, and the
+   'inverse of 10 modulo 11 is 10 itself: 10 * 10 = 99 = 1 mod 11
+  If int_total = 0 Or int_total Mod 11 <> 0 Then
+  
+    Dim digit As Integer
+    digit = 10 * (wights(8) * Val(Mid(str_tfn, 8, 1)) - int_total) Mod 11
+    'Note that if the digit is 10, then this TFN is impossible
+    If digit = 10 Then
+         validateTFN = STR_TFN_Error_MSG
+    Else
+         validateTFN = STR_TFN_Error_MSG
+    End If
+   
+  Else
+      validateTFN = ""
+  
+  End If
+End Function
+
+Function wirteToSummary(int_invalidate_count As Integer)
+  
+  wb_F4_AU_DATA_CLEANSING_after_automatic_run.Worksheets(3).Range("B6").Value = int_invalidate_count
+
+End Function
+
+
+
+

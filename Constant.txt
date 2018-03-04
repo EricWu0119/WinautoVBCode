@@ -1,0 +1,13 @@
+Option Explicit
+'input file - AU Data cleansing report
+
+
+
+'output file - AU Data cleansing report automation run
+Public Const STR_House_number_and_street_newvalue       As String = "G"
+Public Const STR_City_newvalue                          As String = "I"
+Public Const STR_2nd_Address_Line_newvalue              As String = "N"
+Public Const STR_New_TFN_Tax_File_Number_newvalue       As String = "R"
+Public Const STR_TFN_Error_MSG                          As String = "Invalid TFN"
+
+

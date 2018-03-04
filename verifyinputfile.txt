@@ -1,0 +1,144 @@
+
+Public Const STR_MSG_Current_pay_cycle_Empty          As String = "Current_pay_cycle is blank"
+Public Const STR_MSG_Current_pay_cycle_Invalid        As String = "Current_pay_cycle is invalid"
+Public Const STR_MSG_File_NotFound                   As String = "File not found"
+Public Const STR_MSG_WTR_Sheet_Error                 As String = "File Sheet Error"
+Public Const STR_MSG_WTR_Header_Error                As String = "File Header Error"
+Public Const STR_MSG_startdate_Error                As String = "Current start date is invalid"
+Public Const STR_MSG_startdate_empty                As String = "Current start date is blank"
+Sub checkCurrentpaycycle()    'check Current_pay_cycle
+Dim Date_Error As Range
+Set Date_Error = Sheets("AU_data_cleaning_Parm").Range(findParmIDAddress(STR_Current_pay_cycle)).Offset(0, 5)
+Date_Error.Value = ""
+If get_Current_pay_cycle <> "" Then
+    
+    If get_Current_pay_cycle Like "QM ######" Or get_Current_pay_cycle Like "QF ######" Then
+        If get_Current_pay_cycle_month <= 12 And get_Current_pay_cycle_month >= 1 Then
+        Else
+        
+        Date_Error.Value = STR_MSG_Current_pay_cycle_Invalid
+        End If
+    Else
+    
+    Date_Error.Value = STR_MSG_Current_pay_cycle_Invalid
+    End If
+    Else
+    Date_Error.Value = STR_MSG_Current_pay_cycle_Empty
+End If
+ 
+End Sub
+
+Sub checkstartdate() 'check Current_pay_cycle_startdate
+   Dim current_startdate_value As String
+   Set Date_Error = Sheets("AU_data_cleaning_Parm").Range(findParmIDAddress(STR_Current_pay_cycle_startdate)).Offset(0, 5)
+   Date_Error.Value = ""
+   'MsgBox get_Current_pay_cycle_startdate_year
+   'MsgBox get_Current_pay_cycle_startdate_month
+   'MsgBox get_Current_pay_cycle_startdate_date
+   current_startdate_value = get_Current_pay_cycle_startdate_year + "-" + get_Current_pay_cycle_startdate_month + "-" + get_Current_pay_cycle_startdate_date
+   'MsgBox current_startdate_value
+   If get_Current_pay_cycle_startdate <> "" Then
+     If get_Current_pay_cycle_startdate Like "########" Then
+        If IsDate(current_startdate_value) Then
+        Else
+        Date_Error.Value = STR_MSG_startdate_Error
+        End If
+     Else
+     Date_Error.Value = STR_MSG_startdate_Error
+     End If
+     Else
+     Date_Error.Value = STR_MSG_startdate_empty
+    End If
+End Sub
+
+Sub CheckInputFile() 'Check input file exist or not
+Dim Parm_Ran As Range
+For i = 2 To ThisWorkbook.Sheets("AU_data_cleaning_Parm").Range("A65536").End(xlUp).Row
+    Set Parm_Ran = ThisWorkbook.Sheets("AU_data_cleaning_Parm").Range("C" & i)
+    If Parm_Ran.Value = "Input" Then
+        If verifyFileExist(Parm_Ran.Offset(0, -1).Value) Then
+        Parm_Ran.Offset(0, 3).Value = ""
+        Else
+        Parm_Ran.Offset(0, 3).Value = STR_MSG_File_NotFound
+        End If
+    End If
+Next
+End Sub
+Sub CheckEntries_Leaving_Report() 'check Entries_Leaving_Report file header
+    Dim WTR_Error As Range
+    Set WTR_Error = ThisWorkbook.Sheets("AU_data_cleaning_Parm").Range(findParmIDAddress(STR_F1_AU_DATA_CLEANSING)).Offset(0, 5)
+    WTR_Error.Value = ""
+    If verifyFileExist(get_F1_AU_DATA_CLEANSING) = False Then
+        WTR_Error.Value = STR_MSG_File_NotFound
+        Exit Sub
+    End If
+    openF1_AU_DATA_CLEANSING
+    If wb_F1_AU_DATA_CLEANSING.Worksheets.Count <> 1 Then
+    WTR_Error.Value = STR_MSG_WTR_Sheet_Error
+    Else
+        If CheckFileHeader("F1_Header", "A1:P1", "A2:P2", "A3:P3", wb_F1_AU_DATA_CLEANSING.Sheets(1)) Then
+            WTR_Error.Value = STR_MSG_WTR_Header_Error
+        End If
+    End If
+    closeF1_AU_DATA_CLEANSING False
+End Sub
+Function verifyFileExist(in_FileName As String)    ' not exist - false
+    Dim rtValue As Boolean
+    If Dir(Trim(in_FileName)) <> "" And Trim(in_FileName) <> "" And Right(Trim(in_FileName), 1) <> "\" Then
+        rtValue = True
+    Else
+        rtValue = False
+    End If
+    verifyFileExist = rtValue
+End Function
+
+
+Function findParmIDAddress(in_findStr As String) As String
+    
+    Dim C As Range, firstAddress$, arr(), m&, qq&, v1, i
+
+    Dim parmvalue As String
+    Dim ws As Worksheet
+    Dim str_Parm_File_Col As String
+    Set ws = ThisWorkbook.Sheets("AU_data_cleaning_Parm")
+    str_Parm_File_Col = "A:A"
+    v1 = in_findStr
+
+    With ws.Range(str_Parm_File_Col)
+        Set C = .find(v1, , , 1)
+        If Not C Is Nothing Then
+            firstAddress = C.Address
+        End If
+    End With
+
+    findParmIDAddress = firstAddress
+
+End Function
+Function get_Current_pay_cycle_month()
+get_Current_pay_cycle_month = Right(get_Current_pay_cycle, Len(get_Current_pay_cycle) - 7)
+End Function
+Function get_Current_pay_cycle_startdate_year()
+get_Current_pay_cycle_startdate_year = Left(get_Current_pay_cycle_startdate, Len(get_Current_pay_cycle_startdate) - 4)
+End Function
+Function get_Current_pay_cycle_startdate_month()
+get_Current_pay_cycle_startdate_month = Mid(get_Current_pay_cycle_startdate, 5, 2)
+End Function
+Function get_Current_pay_cycle_startdate_date()
+get_Current_pay_cycle_startdate_date = Right(get_Current_pay_cycle_startdate, Len(get_Current_pay_cycle_startdate) - 6)
+End Function
+
+Function CheckFileHeader(in_header, in_range, out_range, compare_range As String, in_sheet As Worksheet)
+    Dim C As Range
+    Dim ws As Worksheet
+    CheckFileHeader = False
+    Set ws = in_sheet
+        ws.Range(in_range).Copy
+        ThisWorkbook.Sheets(in_header).Range(out_range).PasteSpecial xlPasteValues
+        For Each C In ThisWorkbook.Worksheets(in_header).Range(compare_range)
+            If C.Value = "error" Then
+                CheckFileHeader = True
+                Exit Function
+            End If
+        Next C
+End Function
+

@@ -1,0 +1,129 @@
+Option Explicit
+Option Base 1
+
+Const STR_Unique_Parm_AU_Col                      As String = "A:A"
+Const STR_Parm_Sheet                              As String = "AU_data_cleaning_Parm"
+
+Public Const STR_Parm_File                                     As String = "Parm_File"
+Public Const STR_Current_pay_cycle                             As String = "Current_pay_cycle"
+Public Const STR_Current_pay_cycle_startdate                   As String = "Current_pay_cycle_startdate"
+Public Const STR_F1_AU_DATA_CLEANSING                          As String = "F1_AU_DATA_CLEANSING"
+Public Const STR_F2_SSL_PAWB_GVPIBM_AU_sample                  As String = "F2_SSL_PAWB_GVPIBM_AU_sample"
+Public Const STR_F3_SSL_PAWB_GVPIBM_AU                         As String = "F3_SSL_PAWB_GVPIBM_AU"
+Public Const STR_F4_AU_DATA_CLEANSING_after_automatic_run      As String = "F4_AU_DATA_CLEANSING_after_automatic_run"
+Public Const STR_F5_Zip_File                                   As String = "F5_Zip_File"
+Public Const STR_F6_Log_File                                   As String = "F6_Log_File"
+Public Const STR_F7_Macro_Error_Flag_File                      As String = "F7_Macro_Error_Flag_File"
+Public Const STR_R1_Download_GV                                As String = "R1_Download_GV"
+Public Const STR_R1_SMTP_Server                                As String = "R1_SMTP_Server"
+Public Const STR_R1_From_Email                                 As String = "R1_From_Email"
+Public Const STR_R1_To_Payroll_Team_Email_List                 As String = "R1_To_Payroll_Team_Email_List"
+Public Const STR_R1_To_Tech_Support_To_Emails                  As String = "R1_To_Tech_Support_To_Emails"
+Public Const STR_R1_Run_by_Robot                               As String = "R1_Run_by_Robot"
+Public Const STR_R1_GV_Parm_File                               As String = "R1_GV_Parm_File"
+Public Const STR_Root_Folder                                   As String = "Root_Folder"
+Function get_Parm_File() As String
+    get_Parm_File = findParmValue(STR_Parm_File)
+End Function
+Function get_Current_pay_cycle() As String
+    get_Current_pay_cycle = findParmValue(STR_Current_pay_cycle)
+End Function
+Function get_Current_pay_cycle_startdate() As String
+    get_Current_pay_cycle_startdate = findParmValue(STR_Current_pay_cycle_startdate)
+End Function
+Function get_F1_AU_DATA_CLEANSING() As String
+    get_F1_AU_DATA_CLEANSING = findParmValue(STR_F1_AU_DATA_CLEANSING)
+End Function
+Function get_F2_SSL_PAWB_GVPIBM_AU_sample() As String
+    get_F2_SSL_PAWB_GVPIBM_AU_sample = findParmValue(STR_F2_SSL_PAWB_GVPIBM_AU_sample)
+End Function
+Function get_F3_SSL_PAWB_GVPIBM_AU() As String
+    get_F3_SSL_PAWB_GVPIBM_AU = findParmValue(STR_F3_SSL_PAWB_GVPIBM_AU)
+End Function
+Function get_F4_AU_DATA_CLEANSING_after_automatic_run() As String
+    get_F4_AU_DATA_CLEANSING_after_automatic_run = findParmValue(STR_F4_AU_DATA_CLEANSING_after_automatic_run)
+End Function
+Function get_F5_Zip_File() As String
+    get_F5_Zip_File = findParmValue(STR_F5_Zip_File)
+End Function
+Function get_F6_Log_File() As String
+    get_F6_Log_File = findParmValue(STR_F6_Log_File)
+End Function
+Function get_F7_Macro_Error_Flag_File() As String
+    get_F7_Macro_Error_Flag_File = findParmValue(STR_F7_Macro_Error_Flag_File)
+End Function
+Function get_R1_SMTP_Server() As String
+    get_R1_SMTP_Server = findParmValue(STR_R1_SMTP_Server)
+End Function
+Function get_R1_Download_GV() As String
+    get_R1_Download_GV = findParmValue(STR_R1_Download_GV)
+End Function
+
+Function get_R1_From_Email() As String
+    get_R1_From_Email = findParmValue(STR_R1_From_Email)
+End Function
+Function get_R1_To_Payroll_Team_Email_List() As String
+    get_R1_To_Payroll_Team_Email_List = findParmValue(STR_R1_To_Payroll_Team_Email_List)
+End Function
+Function get_R1_To_Tech_Support_To_Emails() As String
+    get_R1_To_Tech_Support_To_Emails = findParmValue(STR_R1_To_Tech_Support_To_Emails)
+End Function
+Function get_R1_Run_by_Robot() As String
+    get_R1_Run_by_Robot = findParmValue(STR_R1_Run_by_Robot)
+End Function
+Function get_R1_GV_Parm_File() As String
+    get_R1_GV_Parm_File = findParmValue(STR_R1_GV_Parm_File)
+End Function
+Function get_Root_Folder() As String
+    get_Root_Folder = findParmValue(STR_Root_Folder)
+End Function
+
+
+Function findParmValue(in_findStr As String)
+    Dim C As Range, firstAddress$, arr(), v1, i
+
+    Dim parmvalue As String
+    Dim ws As Worksheet
+    Dim str_Parm_File_Col As String
+    Set ws = ThisWorkbook.Sheets(STR_Parm_Sheet)
+    str_Parm_File_Col = STR_Unique_Parm_AU_Col
+
+    v1 = in_findStr
+
+    With ws.Range(str_Parm_File_Col)
+        Set C = .find(v1, , , 1)
+        If Not C Is Nothing Then
+            firstAddress = C.Address
+            Do
+                parmvalue = Trim(C.Offset(, 1))
+                Set C = .FindNext(C)
+            Loop While Not C Is Nothing And C.Address <> firstAddress
+        End If
+    End With
+
+    findParmValue = parmvalue
+End Function
+
+Sub testGetMethod()
+
+    Debug.Print get_Parm_File
+    Debug.Print get_Current_pay_cycle
+    Debug.Print get_Current_pay_cycle_startdate
+    Debug.Print get_F1_AU_DATA_CLEANSING
+    Debug.Print get_F2_SSL_PAWB_GVPIBM_AU_sample
+    Debug.Print get_F3_SSL_PAWB_GVPIBM_AU
+    Debug.Print get_F4_AU_DATA_CLEANSING_after_automatic_run
+    Debug.Print get_F5_Zip_File
+    Debug.Print get_F6_Log_File
+    Debug.Print get_F7_Macro_Error_Flag_File
+    Debug.Print get_R1_Download_GV
+    Debug.Print get_R1_SMTP_Server
+    Debug.Print get_R1_From_Email
+    Debug.Print get_R1_To_Payroll_Team_Email_List
+    Debug.Print get_R1_To_Tech_Support_To_Emails
+    Debug.Print get_R1_Run_by_Robot
+    Debug.Print get_R1_GV_Parm_File
+    Debug.Print get_Root_Folder
+
+End Sub
+
